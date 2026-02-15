@@ -5,6 +5,9 @@
 <title>Lucky Spin Rewards</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Adexora Script -->
+<script src="https://adexora.com/cdn/ads.js?id=1935"></script>
+
 <style>
 body{
     margin:0;
@@ -101,14 +104,6 @@ body{
     <div class="log" id="history"></div>
 </div>
 
-<div class="card">
-    <h3>📢 Ad Section (Adexora)</h3>
-    <div style="background:#222;padding:20px;text-align:center;border-radius:10px;">
-        <script src="https://adexora.com/cdn/ads.js?id=1935"></script>
-        
-    </div>
-</div>
-
 <div class="footer">
     © 2026 Lucky Spin Rewards
 </div>
@@ -122,10 +117,25 @@ function update(){
     document.getElementById("balance").innerText = balance;
 }
 
+/* ===== Adexora Ad Function ===== */
 function showAd(callback){
-    alert("🔔 Ad Showing...\n(Adexora Ad will load here)");
-    setTimeout(callback,2000);
+
+    if (!window.showAdexora) {
+        alert("Ad not loaded. Please try again.");
+        return;
+    }
+
+    window.showAdexora()
+    .then(() => {
+        callback();
+    })
+    .catch(e => {
+        alert("Ad failed to load");
+        console.log(e);
+    });
 }
+
+/* ===== Buttons ===== */
 
 function watchAd(){
     showAd(()=>{
@@ -159,23 +169,28 @@ function openWithdraw(){
 
 function withdraw(){
     let amt = parseInt(document.getElementById("amount").value);
+
     if(isNaN(amt) || amt<=0){
         alert("Invalid amount");
         return;
     }
+
     if(amt>balance){
         alert("Not enough balance");
         return;
     }
+
     balance -= amt;
     update();
+
     let h = document.getElementById("history");
     let d = document.createElement("div");
     d.innerText = "Withdraw "+amt+" coins - Pending";
     h.prepend(d);
+
     alert("Withdraw request sent!");
 }
 </script>
 
 </body>
-  </html>
+        </html>
