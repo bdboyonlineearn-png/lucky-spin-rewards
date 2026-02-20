@@ -5,20 +5,15 @@
 <title>Lucky Spin Rewards</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Adexora Video + Native -->
+<!-- Adexora -->
 <script src="https://adexora.com/cdn/ads.js?id=1935"></script>
 <script src="https://adexora.com/cdn/native.js?id=1935"></script>
 
 <style>
-:root{
-  --bg1:#0f2027;--bg2:#203a43;--bg3:#2c5364;
-  --card:rgba(255,255,255,.08);
-  --accent:#00ffcc;
-}
 body{
   margin:0;
   font-family:system-ui,Arial,sans-serif;
-  background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
 }
 .header{
@@ -30,14 +25,14 @@ body{
 }
 .container{padding:15px;max-width:520px;margin:auto;}
 .card{
-  background:var(--card);
+  background:rgba(255,255,255,.08);
   border-radius:18px;
   padding:16px;
   margin-bottom:16px;
   box-shadow:0 10px 25px rgba(0,0,0,.25);
 }
 .balance{text-align:center;font-size:18px;}
-.balance span{font-size:34px;color:var(--accent);font-weight:700;}
+.balance span{font-size:34px;color:#00ffcc;font-weight:700;}
 .btn{
   width:100%;
   padding:14px;
@@ -61,19 +56,24 @@ body{
 
 /* Overlay */
 .overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.85);
-  display:flex;align-items:center;justify-content:center;z-index:9999;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
 }
 .box{
-  background:#111;border-radius:18px;padding:20px;
-  width:92%;max-width:340px;text-align:center;
+  background:#111;
+  border-radius:18px;
+  padding:20px;
+  width:92%;
+  max-width:340px;
+  text-align:center;
 }
 .box h2{margin:0 0 10px}
 .box p{opacity:.85}
-.box input,.box select{
-  width:100%;padding:12px;border-radius:12px;border:none;margin:8px 0;
-}
-.small{font-size:13px;opacity:.7}
 .footer{text-align:center;opacity:.6;font-size:12px;margin:10px 0}
 </style>
 </head>
@@ -92,12 +92,11 @@ body{
   <div class="card">
     <button class="btn" onclick="showVideoAd()">▶ Watch Video Ad</button>
     <button class="btn secondary" onclick="show18()">🖼️ View Native Ad</button>
-    <button class="btn ghost" onclick="openWithdraw()">💰 Withdraw</button>
   </div>
 
-  <!-- Native Ad Card -->
+  <!-- Native Ad -->
   <div class="card hidden" id="nativeBox">
-    <img id="adImg" alt="">
+    <img id="adImg">
     <div id="adTitle">Loading…</div>
     <div id="adDesc"></div>
     <button class="btn secondary">▶ Play</button>
@@ -107,7 +106,7 @@ body{
 </div>
 
 <!-- 18+ Warning -->
-<div class="overlay hidden" id="warn18">
+<div class="overlay" id="warn18">
   <div class="box">
     <h2>🔞 18+ Warning</h2>
     <p>Adult / Casino / Games ads may appear</p>
@@ -116,44 +115,48 @@ body{
   </div>
 </div>
 
-<!-- Withdraw -->
-<div class="overlay hidden" id="withdrawBox"></div>
-
 <script>
-/* ========= GLOBAL ========= */
+/* ===== Safety: hide overlay on load (Telegram bug fix) ===== */
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("warn18").style.display="none";
+});
+
+/* ===== Global ===== */
 let coins = 0;
 let nativeLink = "#";
 let nativeLoaded = false;
 
-/* ========= VIDEO ========= */
+/* ===== Video Ad ===== */
 function showVideoAd(){
-  showAd(); // Adexora video
+  showAd();
 }
 
-/* ========= NATIVE ========= */
+/* ===== 18+ Control ===== */
 function show18(){
-  document.getElementById("warn18").classList.remove("hidden");
+  document.getElementById("warn18").style.display="flex";
 }
 function close18(){
-  document.getElementById("warn18").classList.add("hidden");
+  document.getElementById("warn18").style.display="none";
 }
+
+/* ===== Native Ad ===== */
 function loadNative(){
   close18();
-  nativeLoaded = false;
+  nativeLoaded=false;
   document.getElementById("nativeBox").classList.remove("hidden");
 
   adexoraNative({
     container:"nativeBox",
     onAdLoad:function(ad){
-      nativeLoaded = true;
-      adImg.src = ad.image;
-      adTitle.innerText = ad.title;
-      adDesc.innerText = ad.description;
-      nativeLink = ad.click;
+      nativeLoaded=true;
+      adImg.src=ad.image;
+      adTitle.innerText=ad.title;
+      adDesc.innerText=ad.description;
+      nativeLink=ad.click;
 
-      adImg.onclick = openNative;
-      adTitle.onclick = openNative;
-      adDesc.onclick = openNative;
+      adImg.onclick=openNative;
+      adTitle.onclick=openNative;
+      adDesc.onclick=openNative;
     }
   });
 
@@ -161,54 +164,13 @@ function loadNative(){
     if(!nativeLoaded){ showAd(); }
   },2500);
 }
+
 function openNative(){
   window.open(nativeLink,"_blank");
-  coins += Math.floor(Math.random()*5)+8; // 8–12
-  balance.innerText = coins;
-}
-
-/* ========= WITHDRAW ========= */
-function openWithdraw(){
-  document.getElementById("withdrawBox").innerHTML = `
-    <div class="box">
-      <h2>💰 Withdraw</h2>
-      <p class="small">Minimum: 100 Coins</p>
-      <select id="method">
-        <option>Bkash</option>
-        <option>Nagad</option>
-        <option>USDT</option>
-      </select>
-      <input id="amount" type="number" placeholder="Enter coins">
-      <button class="btn secondary" onclick="submitWithdraw()">Submit</button>
-      <button class="btn ghost" onclick="closeWithdraw()">Cancel</button>
-    </div>`;
-  document.getElementById("withdrawBox").classList.remove("hidden");
-}
-function closeWithdraw(){
-  document.getElementById("withdrawBox").classList.add("hidden");
-}
-function submitWithdraw(){
-  const amt = parseInt(amount.value||0);
-  if(amt < 100) return alert("Minimum 100 coins required");
-  if(amt > coins) return alert("Insufficient balance");
-
-  withdrawBox.innerHTML = `
-    <div class="box">
-      <h2>⏳ Processing</h2>
-      <p>Please wait…</p>
-    </div>`;
-  setTimeout(()=>{
-    coins -= amt;
-    balance.innerText = coins;
-    withdrawBox.innerHTML = `
-      <div class="box">
-        <h2>✅ Submitted</h2>
-        <p>Your request has been submitted.</p>
-        <button class="btn secondary" onclick="closeWithdraw()">OK</button>
-      </div>`;
-  },2000);
+  coins+=Math.floor(Math.random()*5)+8;
+  balance.innerText=coins;
 }
 </script>
 
 </body>
-    </html>
+      </html>
