@@ -2,195 +2,112 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Lucky Spin Rewards</title>
+<title>Lucky Spin – Mini App</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Adexora Script -->
-<script src="https://adexora.com/cdn/ads.js?id=1935"></script>
+<!-- Telegram WebApp -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- Adexora Native Ads -->
+<script src="https://adexora.com/cdn/native.js?id=1935"></script>
 
 <style>
 body{
     margin:0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    font-family:Arial, sans-serif;
+    background:#0f2027;
     color:#fff;
 }
 .header{
-    padding:15px;
+    padding:14px;
     text-align:center;
-    background:#111;
-    font-size:22px;
+    font-size:20px;
     font-weight:bold;
+    background:#111;
 }
-.container{
-    padding:15px;
-}
+.container{padding:14px;}
 .card{
-    background:rgba(255,255,255,0.08);
-    border-radius:15px;
-    padding:15px;
-    margin-bottom:15px;
+    background:#111;
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:14px;
 }
 .balance{
     text-align:center;
-    font-size:20px;
+    font-size:18px;
 }
 .balance span{
-    font-size:32px;
+    font-size:30px;
     color:#00ffcc;
 }
-.btn{
+
+/* Native Ad */
+.ad-img{width:100%;border-radius:14px;}
+.ad-title{font-size:17px;font-weight:bold;margin-top:8px;}
+.ad-desc{font-size:14px;opacity:.8;margin:6px 0;}
+.ad-btn{
     width:100%;
-    padding:15px;
-    margin-top:10px;
+    padding:14px;
     border:none;
     border-radius:12px;
     font-size:18px;
     font-weight:bold;
-    background:linear-gradient(45deg,#ff9800,#ff5722);
+    background:linear-gradient(45deg,#2196f3,#00c6ff);
     color:#fff;
-}
-.btn:active{transform:scale(0.97);}
-.hidden{display:none;}
-.log{
-    background:#000;
-    border-radius:10px;
-    padding:10px;
-    font-size:14px;
-}
-.log div{
-    padding:5px;
-    border-bottom:1px solid #333;
 }
 .footer{
     text-align:center;
     font-size:12px;
-    opacity:0.7;
-    margin-top:20px;
+    opacity:.6;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">🎰 Lucky Spin Rewards</div>
+<div class="header">🎰 Lucky Spin Mini App</div>
 
 <div class="container">
 
 <div class="card balance">
-    Balance <br>
+    Balance<br>
     <span id="balance">0</span> Coins
 </div>
 
-<div class="card">
-    <button class="btn" onclick="watchAd()">🎯 Watch Ad & Earn</button>
-    <button class="btn" onclick="spin()">🎡 Lucky Spin</button>
-    <button class="btn" onclick="scratch()">🪙 Scratch Card</button>
-</div>
-
-<div class="card">
-    <button class="btn" onclick="openWithdraw()">💰 Withdraw</button>
-</div>
-
-<div class="card hidden" id="withdrawPage">
-    <h3>Withdraw</h3>
-    <input id="amount" type="number" placeholder="Enter coins"
-    style="width:100%;padding:12px;border-radius:10px;border:none;">
-    <button class="btn" onclick="withdraw()">Submit Withdraw</button>
-</div>
-
-<div class="card">
-    <h3>📜 Withdraw History</h3>
-    <div class="log" id="history"></div>
-</div>
-
-<div class="footer">
-    © 2026 Lucky Spin Rewards
+<div class="card" id="nativeAd">
+    <img id="adImage" class="ad-img">
+    <div class="ad-title" id="adTitle">Loading...</div>
+    <div class="ad-desc" id="adDesc"></div>
+    <button class="ad-btn" onclick="openAd()">▶ Play</button>
 </div>
 
 </div>
+
+<div class="footer">Ads powered by Adexora</div>
 
 <script>
-let balance = 0;
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-function update(){
-    document.getElementById("balance").innerText = balance;
-}
+let adLink = "#";
+let coins = 0;
 
-/* ===== Adexora Ad Function ===== */
-function showAd(callback){
+adexoraNative({
+  container: "nativeAd",
+  onAdLoad: function(ad){
+    document.getElementById("adImage").src = ad.image;
+    document.getElementById("adTitle").innerText = ad.title;
+    document.getElementById("adDesc").innerText = ad.description;
+    adLink = ad.click;
+  }
+});
 
-    if (!window.showAdexora) {
-        alert("Ad not loaded. Please try again.");
-        return;
-    }
-
-    window.showAdexora()
-    .then(() => {
-        callback();
-    })
-    .catch(e => {
-        alert("Ad failed to load");
-        console.log(e);
-    });
-}
-
-/* ===== Buttons ===== */
-
-function watchAd(){
-    showAd(()=>{
-        balance += 10;
-        update();
-        alert("You earned 10 coins!");
-    });
-}
-
-function spin(){
-    showAd(()=>{
-        let earn = Math.floor(Math.random()*20)+5;
-        balance += earn;
-        update();
-        alert("Spin Win: "+earn+" coins!");
-    });
-}
-
-function scratch(){
-    showAd(()=>{
-        let earn = Math.floor(Math.random()*15)+5;
-        balance += earn;
-        update();
-        alert("Scratch Win: "+earn+" coins!");
-    });
-}
-
-function openWithdraw(){
-    document.getElementById("withdrawPage").classList.toggle("hidden");
-}
-
-function withdraw(){
-    let amt = parseInt(document.getElementById("amount").value);
-
-    if(isNaN(amt) || amt<=0){
-        alert("Invalid amount");
-        return;
-    }
-
-    if(amt>balance){
-        alert("Not enough balance");
-        return;
-    }
-
-    balance -= amt;
-    update();
-
-    let h = document.getElementById("history");
-    let d = document.createElement("div");
-    d.innerText = "Withdraw "+amt+" coins - Pending";
-    h.prepend(d);
-
-    alert("Withdraw request sent!");
+function openAd(){
+  window.open(adLink, "_blank");
+  coins += 10; // reward
+  document.getElementById("balance").innerText = coins;
 }
 </script>
 
 </body>
-        </html>
+    </html>
