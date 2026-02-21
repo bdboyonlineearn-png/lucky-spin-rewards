@@ -5,172 +5,240 @@
 <title>Lucky Spin Rewards</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Adexora -->
+<!-- Telegram WebApp -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- Adexora Rewarded -->
 <script src="https://adexora.com/cdn/ads.js?id=1935"></script>
-<script src="https://adexora.com/cdn/native.js?id=1935"></script>
 
 <style>
 body{
   margin:0;
-  font-family:system-ui,Arial,sans-serif;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  font-family:system-ui,sans-serif;
+  background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
   color:#fff;
 }
+.app{padding:16px}
 .header{
-  padding:16px;
   text-align:center;
-  background:#0b0b0b;
   font-size:22px;
   font-weight:700;
-}
-.container{padding:15px;max-width:520px;margin:auto;}
-.card{
-  background:rgba(255,255,255,.08);
-  border-radius:18px;
-  padding:16px;
   margin-bottom:16px;
-  box-shadow:0 10px 25px rgba(0,0,0,.25);
 }
-.balance{text-align:center;font-size:18px;}
-.balance span{font-size:34px;color:#00ffcc;font-weight:700;}
+.card{
+  background:#2f4f5a;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:16px;
+}
+.balance{
+  text-align:center;
+  font-size:18px;
+}
+.balance span{
+  color:#00ffa6;
+  font-size:30px;
+  font-weight:800;
+}
 .btn{
   width:100%;
-  padding:14px;
-  margin-top:10px;
+  padding:16px;
+  margin-top:12px;
   border:none;
   border-radius:14px;
-  font-size:17px;
-  font-weight:700;
-  background:linear-gradient(45deg,#ff9800,#ff5722);
+  background:linear-gradient(90deg,#ff8a00,#ffb347);
   color:#fff;
+  font-size:18px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s;
 }
-.btn.secondary{background:linear-gradient(45deg,#2196f3,#00c6ff);}
-.btn.ghost{background:#222;}
-.btn:active{transform:scale(.97);}
-.hidden{display:none}
+.btn:active{transform:scale(.96)}
+.btn:disabled{opacity:.6}
+.note{text-align:center;font-size:12px;opacity:.8}
 
-/* Native Ad */
-#adImg{width:100%;border-radius:14px;}
-#adTitle{font-size:18px;font-weight:700;margin-top:10px;}
-#adDesc{font-size:14px;opacity:.85;margin:6px 0}
+/* Spin wheel */
+.wheel{
+  width:180px;
+  height:180px;
+  border-radius:50%;
+  margin:10px auto;
+  background:conic-gradient(
+    #ff9800 0deg 60deg,
+    #ffc107 60deg 120deg,
+    #ff5722 120deg 180deg,
+    #4caf50 180deg 240deg,
+    #03a9f4 240deg 300deg,
+    #9c27b0 300deg 360deg
+  );
+  transition:transform 3s cubic-bezier(.17,.67,.12,1);
+}
+.pointer{
+  width:0;height:0;
+  border-left:10px solid transparent;
+  border-right:10px solid transparent;
+  border-bottom:20px solid #fff;
+  margin:0 auto;
+}
 
-/* Overlay */
-.overlay{
+/* Popup */
+.popup{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.85);
-  display:none;
+  background:#000000aa;
+  display:flex;
   align-items:center;
   justify-content:center;
-  z-index:9999;
 }
-.box{
-  background:#111;
-  border-radius:18px;
+.popup-box{
+  background:#1c2f38;
   padding:20px;
-  width:92%;
-  max-width:340px;
-  text-align:center;
+  border-radius:16px;
+  width:85%;
+  max-width:300px;
 }
-.box h2{margin:0 0 10px}
-.box p{opacity:.85}
-.footer{text-align:center;opacity:.6;font-size:12px;margin:10px 0}
+.popup-box input{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
+  border:none;
+}
+.popup-box button{
+  margin-top:12px;
+}
+.hidden{display:none}
+
+/* Coin popup */
+.coin-pop{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  background:#000000cc;
+  padding:20px 26px;
+  border-radius:16px;
+  font-size:20px;
+  font-weight:700;
+  animation:pop 1.2s ease forwards;
+}
+@keyframes pop{
+  0%{opacity:0; transform:translate(-50%,-50%) scale(.5)}
+  30%{opacity:1; transform:translate(-50%,-60%) scale(1.1)}
+  100%{opacity:0; transform:translate(-50%,-90%) scale(.8)}
+}
 </style>
 </head>
 
 <body>
+<div class="app">
 
 <div class="header">🎰 Lucky Spin Rewards</div>
 
-<div class="container">
-
-  <div class="card balance">
-    Balance<br>
-    <span id="balance">0</span> Coins
-  </div>
-
-  <div class="card">
-    <button class="btn" onclick="showVideoAd()">▶ Watch Video Ad</button>
-    <button class="btn secondary" onclick="show18()">🖼️ View Native Ad</button>
-  </div>
-
-  <!-- Native Ad -->
-  <div class="card hidden" id="nativeBox">
-    <img id="adImg">
-    <div id="adTitle">Loading…</div>
-    <div id="adDesc"></div>
-    <button class="btn secondary">▶ Play</button>
-  </div>
-
-  <div class="footer">Ads powered by Adexora</div>
+<div class="card balance">
+  Balance<br>
+  <span id="coins">0</span> Coins
 </div>
 
-<!-- 18+ Warning -->
-<div class="overlay" id="warn18">
-  <div class="box">
-    <h2>🔞 18+ Warning</h2>
-    <p>Adult / Casino / Games ads may appear</p>
-    <button class="btn secondary" onclick="loadNative()">I am 18+</button>
-    <button class="btn ghost" onclick="close18()">Cancel</button>
+<div class="card">
+  <button class="btn" id="rewardBtn">🎯 Watch Ad & Earn</button>
+
+  <div class="pointer"></div>
+  <div class="wheel" id="wheel"></div>
+
+  <button class="btn" id="spinBtn">🎡 Lucky Spin</button>
+  <button class="btn">🏛 Scratch Card</button>
+</div>
+
+<div class="card">
+  <button class="btn" id="withdrawBtn">💰 Withdraw</button>
+</div>
+
+<div class="note">
+  18+ Warning • Casino / Games ads may appear
+</div>
+
+</div>
+
+<!-- Withdraw Popup -->
+<div class="popup hidden" id="withdrawPopup">
+  <div class="popup-box">
+    <h3>Withdraw</h3>
+    <input id="wallet" placeholder="Enter wallet / number">
+    <button class="btn" id="confirmWithdraw">Confirm</button>
+    <button class="btn" onclick="closeWithdraw()">Cancel</button>
   </div>
 </div>
+
+<!-- Sound -->
+<audio id="coinSound">
+  <source src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3">
+</audio>
 
 <script>
-/* ===== Safety: hide overlay on load (Telegram bug fix) ===== */
-document.addEventListener("DOMContentLoaded",()=>{
-  document.getElementById("warn18").style.display="none";
-});
+const tg = window.Telegram.WebApp;
+tg.ready();
 
-/* ===== Global ===== */
 let coins = 0;
-let nativeLink = "#";
-let nativeLoaded = false;
+const coinEl = document.getElementById("coins");
+const sound = document.getElementById("coinSound");
 
-/* ===== Video Ad ===== */
-function showVideoAd(){
-  showAd();
+// Coin popup
+function showCoinPopup(text){
+  const d=document.createElement("div");
+  d.className="coin-pop";
+  d.innerText=text;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(),1200);
 }
 
-/* ===== 18+ Control ===== */
-function show18(){
-  document.getElementById("warn18").style.display="flex";
-}
-function close18(){
-  document.getElementById("warn18").style.display="none";
-}
+// Rewarded Ad
+rewardBtn.onclick=()=>{
+  window.showAdexora().then(()=>{
+    coins++;
+    coinEl.innerText=coins;
+    sound.play();
+    showCoinPopup("+1 Coin 🎉");
+  }).catch(()=>alert("No ads available"));
+};
 
-/* ===== Native Ad ===== */
-function loadNative(){
-  close18();
-  nativeLoaded=false;
-  document.getElementById("nativeBox").classList.remove("hidden");
-
-  adexoraNative({
-    container:"nativeBox",
-    onAdLoad:function(ad){
-      nativeLoaded=true;
-      adImg.src=ad.image;
-      adTitle.innerText=ad.title;
-      adDesc.innerText=ad.description;
-      nativeLink=ad.click;
-
-      adImg.onclick=openNative;
-      adTitle.onclick=openNative;
-      adDesc.onclick=openNative;
-    }
-  });
-
+// Spin
+spinBtn.onclick=()=>{
+  const wheel=document.getElementById("wheel");
+  const deg=360*5+Math.floor(Math.random()*360);
+  wheel.style.transform=`rotate(${deg}deg)`;
   setTimeout(()=>{
-    if(!nativeLoaded){ showAd(); }
-  },2500);
+    coins+=2;
+    coinEl.innerText=coins;
+    showCoinPopup("+2 Coins 🎡");
+  },3000);
+};
+
+// Withdraw
+withdrawBtn.onclick=()=>{
+  document.getElementById("withdrawPopup").classList.remove("hidden");
+};
+
+function closeWithdraw(){
+  document.getElementById("withdrawPopup").classList.add("hidden");
 }
 
-function openNative(){
-  window.open(nativeLink,"_blank");
-  coins+=Math.floor(Math.random()*5)+8;
-  balance.innerText=coins;
-}
+confirmWithdraw.onclick=()=>{
+  const wallet=document.getElementById("wallet").value.trim();
+  if(wallet===""){
+    alert("Enter wallet/number");
+    return;
+  }
+  if(coins<10){
+    alert("Minimum 10 coins required");
+    return;
+  }
+  coins=0;
+  coinEl.innerText=coins;
+  closeWithdraw();
+  alert("Withdraw request submitted");
+};
 </script>
 
 </body>
-      </html>
+  </html>
